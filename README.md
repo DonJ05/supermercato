@@ -141,37 +141,61 @@ Lo script gestisce anche:
   Se il file non esiste o è vuoto, viene creato con intestazione chiara.
 
 
+## 10) Problema individuato
+
+Nel sistema di casse analizzato, **cassa e server devono avere orari coerenti**.  
+Una differenza significativa di tempo può causare:
+
+- Errori nella ricostruzione delle vendite  
+- Problemi di sincronizzazione dei file CSV  
+- Incoerenze nei log di sicurezza  
+- Difficoltà nell’analisi forense e negli audit  
+
+In ambienti con funzionamento **offline/online intermittente**, una cassa con orario errato può:
+- Registrare vendite con timestamp non attendibili  
+- Inviare dati che il server interpreta come duplicati o fuori sequenza  
+
+### Motivazione della scelta
+
+Il controllo dell’orario è stato introdotto perché:
+- I log e le vendite si basano sul timestamp  
+- La sicurezza e la tracciabilità richiedono tempi affidabili 
+
+Differenze di orario compromettono:
+- L’ordine cronologico delle vendite  
+- La corretta sincronizzazione offline → online  
+- L’affidabilità dei report  
+
+Questo controllo migliora:
+- L’integrità dei dati  
+- La coerenza dei log  
+- La sicurezza operativa complessiva del sistema
+
+L’uso di una **soglia di tolleranza configurabile** consente:
+- Flessibilità operativa  
+- Adattamento a contesti reali (latenza di rete, micro-scarti temporali)  
+
+### Cosa fa lo script
+Lo script verifica che l’orario della **cassa** e quello del **server centrale** siano coerenti, condizione fondamentale per garantire l’affidabilità dei log e dei dati di vendita.
+
+In particolare:
+- Confronta l’orario della cassa con quello del server
+- Valida l’orario del server confrontandolo con una fonte esterna affidabile
+- Calcola la differenza temporale tra cassa e server
+- Verifica che tale differenza rientri in una soglia di tolleranza configurabile
+- In caso di scarto eccessivo, aggiorna automaticamente l’orario della cassa
+- Fornisce un riscontro chiaro sugli orari finali di cassa e server
+
+### Come usare lo script
+```bash
+./ex10.sh 5
+```
+- Lo script richiede **un solo parametro**: il numero di secondi di tolleranza ammessi tra cassa e server.
+- Se la differenza rientra nella soglia, il sistema viene considerato sincronizzato.
+- Se la differenza supera la soglia, l’orario della cassa viene corretto automaticamente.
+- Lo script è pensato per essere eseguito manualmente dal sistemista o integrato in procedure di controllo periodico.
 
 
 
 
 
-
-
-
-
-## Problema 4 – Disallineamento orario cassa–server
-
-### Descrizione
-
-- Differenze di orario causano:
-  - errori nei log
-  - problemi di sincronizzazione
-  - incoerenze nei report
-
-### Soluzione adottata
-
-- Inserimento di una soglia di tolleranza configurabile
-- Confronto tra:
-  - orario cassa
-  - orario server
-  - riferimento esterno
-- Verifica di coerenza del server
-- Aggiornamento automatico dell’orario della cassa se necessario
-
-### Risultato
-
-- Timestamp coerenti
-- Migliore affidabilità dei dati
-
----
