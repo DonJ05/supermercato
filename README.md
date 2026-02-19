@@ -49,11 +49,11 @@ SOGLIA_MS=200 # Latenza massima (ms)
 CASSA_ID="CASSA_01" # ID univoco della cassa
 
 ##  Esecuzione
-# Esecuzione standard (usa IP e soglia di default)
+Esecuzione standard (usa IP e soglia di default)
 ./check_network.sh
 
-# Esecuzione con IP e soglia personalizzati
-# Esempio: server locale con soglia 100ms
+Esecuzione con IP e soglia personalizzati
+Esempio: server locale con soglia 100ms
 ./check_network.sh 192.168.1.50 100
 
 # 2) Gestione Buffer Vendite Offline (`svuota_buffer.sh`)
@@ -103,10 +103,10 @@ LOG_FILE="cassa.log"        # File log
 CASSA_ID="CASSA_01"        # ID univoco della cassa  
 
 ## Esecuzione
-# Rendi eseguibile lo script  
+Rendi eseguibile lo script  
 chmod +x svuota_buffer.sh  
 
-# Esecuzione standard  
+Esecuzione standard  
 ./svuota_buffer.sh
 
 ---
@@ -160,10 +160,10 @@ CASSA_ID="CASSA_01"           # ID univoco della cassa
 ---
 
 ##  Esecuzione
-# Rendi eseguibile lo script  
+Rendi eseguibile lo script  
 chmod +x genera_scontrino.sh  
 
-# Esecuzione standard  
+ Esecuzione standard  
 ./genera_scontrino.sh  
 
 **Output:** lo scontrino viene stampato a terminale e l’evento registrato in `cassa.log`.
