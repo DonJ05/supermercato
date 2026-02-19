@@ -1,6 +1,6 @@
 ## 1) Problema individuato
 
-## 1. Descrizione
+## Descrizione
 `check_network.sh` è uno script bash progettato per garantire la continuità operativa della cassa in presenza di problemi di rete.  
 Lo script verifica la raggiungibilità del server centrale e la qualità della connessione, passando automaticamente la cassa in **modalità offline** se necessario e registrando ogni evento nel file di log `cassa.log`.
 
@@ -11,7 +11,7 @@ Lo script verifica la raggiungibilità del server centrale e la qualità della c
 
 ---
 
-## 2. Problema Individuato
+## Problema Individuato
 - **Instabilità della connessione:** il server può essere irraggiungibile o rispondere lentamente (>200 ms).  
 - **Conseguenze:**  
   - Blocco temporaneo della cassa, rallentando le operazioni.  
@@ -20,7 +20,7 @@ Lo script verifica la raggiungibilità del server centrale e la qualità della c
 
 ---
 
-## 3. Funzionamento dello Script
+## Funzionamento dello Script
 - **Preparazione log:** crea `cassa.log` se non esiste (`touch "$LOG_FILE"`).  
 - **Ping al server:** invia un pacchetto ICMP (`ping -c 1 -W 2 $SERVER_IP`). Mancata risposta identifica il server come irraggiungibile.  
 - **Verifica latenza:** se il server risponde, estrae la latenza e la confronta con la soglia (`SOGLIA_MS=200`). Latenza superiore forza modalità offline e genera un warning.  
@@ -29,13 +29,13 @@ Lo script verifica la raggiungibilità del server centrale e la qualità della c
 
 ---
 
-## 4. Configurazione
+## Configurazione
 SERVER_IP="8.8.8.8" # IP del server da controllare
 LOG_FILE="cassa.log" # File log
 SOGLIA_MS=200 # Latenza massima (ms)
 CASSA_ID="CASSA_01" # ID univoco della cassa
 
-## 5. Esecuzione
+## Esecuzione
 # Esecuzione standard (usa IP e soglia di default)
 ./check_network.sh
 
@@ -50,7 +50,7 @@ CASSA_ID="CASSA_01" # ID univoco della cassa
 
 ## 2) Problema individuato
 
-## 1. Descrizione
+## Descrizione
 `svuota_buffer.sh` è uno script bash progettato per garantire la **sicurezza dei dati di vendita** quando la cassa opera offline.  
 Durante l’assenza di connessione, le vendite vengono salvate nel file `vendite_buffer.csv`. Lo script gestisce la sincronizzazione con il server centrale evitando perdite o corruzioni di dati.
 
@@ -62,7 +62,7 @@ Durante l’assenza di connessione, le vendite vengono salvate nel file `vendite
 
 ---
 
-## 2. Problema Individuato
+## Problema Individuato
 - **Buffer locale:** le vendite offline sono salvate in `vendite_buffer.csv`.  
 - **Rischi:**  
   - Perdita dati se il buffer viene rimosso prematuramente senza conferma.  
@@ -71,7 +71,7 @@ Durante l’assenza di connessione, le vendite vengono salvate nel file `vendite
 
 ---
 
-## 3. Funzionamento dello Script
+## Funzionamento dello Script
 - **Verifica file:** controlla che `vendite_buffer.csv` esista prima di procedere (`if [ ! -f "$BUFFER" ]; then exit 1; fi`).  
 - **Conteggio record:** analizza il numero di transazioni oltre l’intestazione (`wc -l`) e procede solo se ci sono dati.  
 - **Handshake server:** la cancellazione avviene solo se il server risponde "OK". Se riceve "FAIL", i dati restano protetti e viene generato un alert.  
@@ -80,12 +80,12 @@ Durante l’assenza di connessione, le vendite vengono salvate nel file `vendite
 
 ---
 
-## 4. Configurazione
+## Configurazione
 BUFFER="vendite_buffer.csv" # File temporaneo vendite offline  
 LOG_FILE="cassa.log"        # File log  
 CASSA_ID="CASSA_01"        # ID univoco della cassa  
 
-## 5. Esecuzione
+## Esecuzione
 # Rendi eseguibile lo script  
 chmod +x svuota_buffer.sh  
 
@@ -96,7 +96,7 @@ chmod +x svuota_buffer.sh
 
 ## 3) Problema individuato
 
-## 1. Descrizione
+## Descrizione
 `genera_scontrino.sh` è uno script bash progettato per generare **scontrini leggibili** quando la cassa opera offline.  
 Durante la modalità offline, le vendite sono salvate nel file `vendite_buffer.csv` utilizzando codici prodotto tecnici (es. P001). Lo script trasforma questi codici in nomi commerciali, calcola i totali e produce un documento chiaro, pronto per essere stampato o visualizzato a terminale.
 
@@ -108,7 +108,7 @@ Durante la modalità offline, le vendite sono salvate nel file `vendite_buffer.c
 
 ---
 
-## 2. Problema Individuato
+## Problema Individuato
 - **Buffer tecnico:** le vendite offline contengono solo codici prodotto.  
 - **Rischi:**  
   - Mancanza di trasparenza: scontrini illeggibili per clienti e personale.  
@@ -117,7 +117,7 @@ Durante la modalità offline, le vendite sono salvate nel file `vendite_buffer.c
 
 ---
 
-## 3. Funzionamento dello Script
+## Funzionamento dello Script
 - **Identificazione transazione:** estrae l’ultimo ID scontrino dal buffer usando `tail` e `cut`.  
 - **Data matching locale:** converte codici prodotto in nomi commerciali tramite `prodotti_default.csv`.  
 - **Ricalcolo totale con AWK:** somma i totali riga per garantire coerenza matematica.  
@@ -126,7 +126,7 @@ Durante la modalità offline, le vendite sono salvate nel file `vendite_buffer.c
 
 ---
 
-## 4. Configurazione
+## Configurazione
 BUFFER="vendite_buffer.csv"    # File buffer vendite offline  
 PRODOTTI="prodotti_default.csv" # File anagrafica prodotti  
 LOG_FILE="cassa.log"           # File log  
@@ -134,7 +134,7 @@ CASSA_ID="CASSA_01"           # ID univoco della cassa
 
 ---
 
-## 5. Esecuzione
+## Esecuzione
 # Rendi eseguibile lo script  
 chmod +x genera_scontrino.sh  
 
