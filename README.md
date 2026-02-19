@@ -47,7 +47,7 @@ SERVER_IP="8.8.8.8" # IP del server da controllare
 LOG_FILE="cassa.log" # File log
 SOGLIA_MS=200 # Latenza massima (ms)
 CASSA_ID="CASSA_01" # ID univoco della cassa
----
+
 ##  Esecuzione
 # Esecuzione standard (usa IP e soglia di default)
 ./check_network.sh
@@ -101,7 +101,7 @@ In particolare:
 BUFFER="vendite_buffer.csv" # File temporaneo vendite offline  
 LOG_FILE="cassa.log"        # File log  
 CASSA_ID="CASSA_01"        # ID univoco della cassa  
----
+
 ## Esecuzione
 # Rendi eseguibile lo script  
 chmod +x svuota_buffer.sh  
