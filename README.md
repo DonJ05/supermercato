@@ -421,11 +421,11 @@ Lo script opera in modo continuo o periodico senza interferire con le normali op
 ### Come usare lo script
 
 ```bash
-./scriptControl.sh
+sudo ./scriptControl.sh
 ```
 oppure se si vuol fare andare lo script in background:
 ```bash
-./scriptControl.sh &
+sudo ./scriptControl.sh &
 ```
 
 
