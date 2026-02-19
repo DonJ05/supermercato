@@ -169,6 +169,266 @@ chmod +x genera_scontrino.sh
 **Output:** lo scontrino viene stampato a terminale e l’evento registrato in `cassa.log`.
 
 
+## 4) Problema individuato
+
+**Problema:** utilizzo di un file `prodotti_default.csv` non aggiornato nella cassa.  
+Quando la connessione con il server centrale non è disponibile, la cassa entra in modalità offline e utilizza il file locale `prodotti_default.csv` come unica fonte dati per prezzi, stato attivo dei prodotti e altre informazioni di vendita.
+
+Se questo file non è allineato con il database centrale, la cassa può operare con dati obsoleti.
+
+### Può causare
+
+- **Errori di prezzo:** vendita di prodotti con importi non aggiornati.  
+- **Disallineamenti contabili:** differenze tra vendite registrate in cassa e dati presenti nel database centrale.    
+- **Vendita di prodotti disattivati:** articoli rimossi dal catalogo potrebbero risultare ancora disponibili.
+
+### Rilevanza nel contesto
+
+- Nel supermercato, l’**accuratezza dei dati di vendita** è essenziale per la gestione economica e fiscale.  
+- La modalità offline garantisce continuità operativa, ma richiede un meccanismo sicuro di aggiornamento del catalogo.  
+- Mantenere il file `prodotti_default.csv` sincronizzato con il server centrale assicura:  
+  - coerenza tra cassa e database,  
+  - corretto aggiornamento del magazzino,  
+  - affidabilità nei report di vendita.  
+
+L’integrità del catalogo prodotti è quindi un elemento critico per la stabilità dell’intero sistema.
+
+---
+
+### Sintesi dello script
+
+Lo script `ScriptCassa.sh` gestisce l’aggiornamento automatico del file `prodotti_default.csv`, garantendo sincronizzazione sicura e prevenendo corruzioni.
+
+#### Funzionalità principali
+
+- Verifica la disponibilità del server centrale tramite `nc` (netcat).  
+- Scarica il catalogo aggiornato in formato CSV quando la connessione è attiva.  
+- Salva i dati ricevuti in un file temporaneo (`Temp_prodotti_default.csv`).  
+- Confronta il file temporaneo con quello attualmente in uso tramite `diff`.  
+- Sostituisce il file locale solo in presenza di differenze, utilizzando `cp` e `rm` .  
+
+---
+
+#### Come usare lo script
+
+```bash
+./ScriptCassa.sh
+```
+
+
+## 5) Problema individuato
+
+**Problema:** possibile modifica dei file critici della cassa da parte di processi nocivi o non autorizzati.  
+Il corretto funzionamento del sistema di cassa dipende dall’integrità di alcuni file fondamentali, tra cui:
+
+- `prodotti_default.csv`
+- `vendite_buffer.csv`
+- `cassa.log`
+
+Questi file contengono informazioni essenziali per la gestione dei prodotti, delle vendite e per la tracciabilità delle operazioni.
+
+Se un processo nocivo (malware, script non autorizzato, utente con privilegi errati, ecc.) dovesse modificare tali file, potrebbero verificarsi gravi anomalie.
+
+### Può causare
+
+- **Alterazione dei prezzi dei prodotti**
+- **Manipolazione dei dati di vendita**
+- **Cancellazione o modifica dei log**
+- **Compromissione della configurazione del sistema**
+- **Malfunzionamenti della cassa**
+
+Un’eventuale compromissione dei file critici potrebbe generare blocchi operativi e significative perdite economiche per l’azienda.
+
+---
+
+### Rilevanza nel contesto
+
+- Nel supermercato, l’**integrità dei dati** è fondamentale per garantire correttezza contabile e affidabilità del sistema.
+- I file locali rappresentano la base operativa della cassa, specialmente in modalità offline.
+- Proteggere tali file significa:
+  - prevenire manipolazioni accidentali o malevole,
+  - garantire tracciabilità delle operazioni,
+  - mantenere stabilità e sicurezza dell’infrastruttura.
+
+La protezione dei file critici è quindi una misura preventiva di sicurezza indispensabile.
+
+---
+
+### Sintesi dello script
+
+Lo script `ScriptPerms.sh` assicura che i file critici della cassa siano protetti da modifiche non autorizzate, verificando e impostando i permessi dei file.
+
+#### Funzionalità principali
+
+- Controlla l’esistenza dei file critici (`prodotti_default.csv`, `vendite_buffer.csv`, `cassa.log`).
+- Crea automaticamente i file mancanti.
+- Imposta permessi restrittivi (es. `chmod 600`).
+- Assegna il proprietario corretto (root o utente designato).
+- Verifica periodicamente che i permessi non siano stati alterati.
+- Ripristina automaticamente i permessi corretti se rileva modifiche non conformi.
+
+---
+
+### Modalità di funzionamento
+
+1. **Verifica dell’esistenza dei file**
+
+   Per ogni file critico, lo script controlla la presenza nel filesystem della cassa.  
+   Se un file non esiste, viene creato automaticamente per garantire continuità operativa.
+
+2. **Impostazione dei permessi restrittivi**
+
+   Lo script imposta:
+
+   - Proprietario: amministratore (root o utente dedicato)
+   - Permessi: lettura e scrittura solo per il proprietario (`chmod 600`)
+
+   Questo implica che:
+
+   - Solo l’amministratore può leggere e modificare il file.
+   - Altri utenti o processi non autorizzati non possono accedere ai contenuti.
+
+3. **Ripristino automatico dei permessi**
+
+   Lo script può essere eseguito oltre che all'inizio del ciclo di vita di una cassa.
+
+   Se rileva permessi diversi da quelli previsti:
+
+   - Ripristina automaticamente i permessi corretti.
+   - Riporta il proprietario previsto.
+
+---
+
+### Come usare lo script
+
+```bash
+./ScriptPerms.sh
+```
+
+## 6) Problema individuato
+
+**Problema:** mancato monitoraggio dello stato operativo della cassa.  
+Durante il normale funzionamento di una cassa basata su sistema Linux, possono verificarsi condizioni anomale che compromettono stabilità e continuità operativa.
+
+Tra le principali criticità si individuano:
+
+- Saturazione della memoria RAM  
+- Spazio su disco insufficiente o prossimo all’esaurimento  
+- Arresto o crash del processo dell’applicazione di cassa  
+- Temperatura della CPU eccessivamente elevata  
+- Crescita anomala del file `vendite_buffer.csv` in modalità offline  
+
+Tali condizioni possono causare rallentamenti, blocchi del sistema, perdita di dati o interruzione delle operazioni di vendita.
+
+### Può causare
+
+- **RAM quasi piena:** impedisce l’esecuzione corretta dei processi.  
+- **Disco pieno:** blocca la registrazione di vendite e log.  
+- **Processo della cassa assente:** impossibilità di effettuare operazioni.  
+- **CPU troppo calda:** rischio di spegnimenti improvvisi o danni hardware.  
+- **File `vendite_buffer.csv` troppo grande:** rischio di saturazione della memoria (8 GB totali) e indicatore di prolungata disconnessione dal server.
+
+---
+
+### Rilevanza nel contesto
+
+- Nel supermercato, la **continuità operativa** è fondamentale per evitare interruzioni delle vendite.
+- Un sistema non monitorato può degenerare rapidamente in guasto critico.
+- L’approccio deve essere **proattivo**, non reattivo: intercettare i problemi prima che causino fermo macchina.
+
+Il monitoraggio continuo aumenta l’affidabilità dell’infrastruttura e riduce i tempi di inattività.
+
+---
+
+### Sintesi dello script
+
+Lo script `scriptControl.sh` implementa un sistema di monitoraggio periodico delle risorse critiche della cassa.
+
+Viene eseguito in background e controlla costantemente lo stato del sistema.
+
+---
+
+### Funzionalità principali
+
+- Verifica percentuale di utilizzo della RAM.  
+- Controlla spazio disponibile su disco.  
+- Monitora la dimensione del file `vendite_buffer.csv`.  
+- Rileva temperatura della CPU.  
+- Verifica la presenza del processo dell’applicazione di cassa.  
+- Invia notifiche ai sistemisti in caso di anomalie.
+
+---
+
+### Modalità di funzionamento
+
+#### 1. Controllo della memoria RAM
+
+Lo script verifica la percentuale di utilizzo della RAM.  
+Se l’utilizzo supera il **90%**, viene generato un avviso.
+
+---
+
+#### 2. Controllo dello spazio su disco
+
+Viene analizzata la percentuale di utilizzo del disco.  
+Se l’utilizzo supera il **90%**, viene generata una segnalazione.
+
+---
+
+#### 3. Controllo dimensione file `vendite_buffer.csv`
+
+Lo script verifica la dimensione del file.
+
+Se supera **1 GB**, può indicare:
+
+- Prolungata modalità offline  
+- Rischio di saturazione della memoria  
+
+In tal caso viene generato un avviso.
+
+---
+
+#### 4. Controllo temperatura CPU
+
+Viene monitorata la temperatura della CPU.  
+Se supera una soglia critica predefinita, viene inviata una notifica per prevenire:
+
+- Spegnimenti improvvisi  
+- Danni hardware  
+
+---
+
+#### 5. Verifica del processo dell’applicazione di cassa
+
+Lo script controlla se il processo dell’applicazione di cassa è in esecuzione.
+
+Se il processo risulta assente:
+
+- Viene generato un messaggio di allerta.
+
+---
+
+#### 6. Invio notifiche
+
+Se uno o più controlli risultano negativi, lo script:
+
+- Invia un messaggio ai sistemisti 
+
+Lo script opera in modo continuo o periodico senza interferire con le normali operazioni di vendita.
+
+---
+
+### Come usare lo script
+
+```bash
+./scriptControl.sh
+```
+oppure se si vuol fare andare lo script in background:
+```bash
+./scriptControl.sh &
+```
+
+
 ## 7) Problema individuato
 
 **Problema:** duplicazione delle vendite nei file `vendite_buffer.csv`.  
