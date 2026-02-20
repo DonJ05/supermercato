@@ -42,12 +42,6 @@ In particolare:
 
 ---
 
-## Configurazione
-SERVER_IP="8.8.8.8" # IP del server da controllare
-LOG_FILE="cassa.log" # File log
-SOGLIA_MS=200 # Latenza massima (ms)
-CASSA_ID="CASSA_01" # ID univoco della cassa
-
 ##  Esecuzione
 Esecuzione standard (usa IP e soglia di default)
 ./check_network.sh
@@ -96,11 +90,7 @@ In particolare:
 - Mantiene l’intestazione CSV per preservare il formato  
 - Registra ogni operazione in `cassa.log` con timestamp, stato e dettagli  
 
----
-## Configurazione
-BUFFER="vendite_buffer.csv" # File temporaneo vendite offline  
-LOG_FILE="cassa.log"        # File log  
-CASSA_ID="CASSA_01"        # ID univoco della cassa  
+--- 
 
 ## Esecuzione
 Rendi eseguibile lo script  
@@ -149,13 +139,6 @@ In particolare:
 - Ricalcola il totale dello scontrino con `awk`  
 - Allinea nomi prodotti e prezzi a terminale usando `printf`  
 - Registra l’evento in `cassa.log` con tag `PRINT_RECEIPT`  
-
----
-##  Configurazione
-BUFFER="vendite_buffer.csv"    # File buffer vendite offline  
-PRODOTTI="prodotti_default.csv" # File anagrafica prodotti  
-LOG_FILE="cassa.log"           # File log  
-CASSA_ID="CASSA_01"           # ID univoco della cassa  
 
 ---
 
