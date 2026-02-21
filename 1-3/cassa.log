@@ -1,0 +1,16 @@
+cat > cassa.log << 'EOF'
+timestamp;livello;cassa_id;evento;modalita;file_coinvolto;record_coinvolti;esito;messaggio;memoria_mb;retry_count
+2026-02-16 08:30:00;ERROR;CASSA_01;NET_CHECK;offline;none;0;FAIL;Server non raggiungibile;512;0
+2026-02-16 08:35:00;INFO;CASSA_01;VENDITA;offline;vendite_buffer.csv;1;SUCCESS;Scontrino salvato locale;512;0
+2026-02-16 08:39:48;ERROR;CASSA_01;NET_CHECK;offline;none;0;FAIL;Server non raggiungibile - Passaggio a locale;0;0
+2026-02-16 08:43:20;INFO;CASSA_01;SYNC_DATA;online;vendite_buffer.csv;1;SUCCESS;Sincronizzazione completata e buffer svuotato;0;0
+2026-02-16 08:45:00;WARNING;CASSA_01;NET_CHECK;offline;none;0;FAIL;Connessione instabile (450ms);512;1
+2026-02-16 08:48:54;INFO;CASSA_01;SYNC_DATA;online;vendite_buffer.csv;4543;SUCCESS;Sincronizzazione completata e buffer svuotato;0;0
+2026-02-16 08:50:00;INFO;CASSA_01;VENDITA;offline;vendite_buffer.csv;1;SUCCESS;Scontrino salvato locale;512;0
+2026-02-16 08:54:01;ERROR;CASSA_01;NET_CHECK;offline;none;0;FAIL;Server non raggiungibile - Passaggio a locale;0;0
+2026-02-16 08:59:53;INFO;CASSA_01;SYNC_DATA;online;vendite_buffer.csv;4544;SUCCESS;Sincronizzazione completata e buffer svuotato;0;0
+2026-02-16 09:00:00;INFO;CASSA_01;PRINT_RECEIPT;offline;vendite_buffer.csv;1;SUCCESS;Scontrino 8d1b55ab-15ef-4254-9f44-33cc4547b132 generato;512;0
+2026-02-16 09:01:24;ERROR;CASSA_01;SYNC_DATA;online;vendite_buffer.csv;0;FAIL;Errore server: dati mantenuti nel buffer;0;1
+2026-02-16 09:05:12;INFO;CASSA_01;PRINT_RECEIPT;offline;vendite_buffer.csv;1;SUCCESS;Scontrino b2c3d4e5-... generato;512;0
+2026-02-16 10:02:34;ERROR;CASSA_01;NET_CHECK;offline;none;0;FAIL;Server non raggiungibile - Passaggio a locale;0;0
+EOF
