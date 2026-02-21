@@ -1,154 +1,137 @@
-# 1) Monitoraggio della Rete Cassa-Server (`check_network.sh`)
+## 1) Problema individuato
 
-Nel sistema di casse analizzato, la **connessione tra cassa e server deve essere stabile**.  
-Instabilità o latenze elevate possono causare:
+**Problema:** Analisi e resilienza della connessione (`check_network.sh`).
 
-- Blocco temporaneo della cassa  
-- Perdita o corruzione dei dati di vendita  
-- Difficoltà nel distinguere tra server down e lentezza di rete  
-
-In ambienti con funzionamento **offline/online intermittente**, una connessione instabile può:
-- Far passare la cassa in modalità offline senza preavviso  
-- Ritardare le transazioni o generare errori nei log  
-- Compromettere la continuità operativa del sistema
+In un sistema operativo GNU/Linux dedicato alla vendita, la rete deve essere monitorata costantemente.  
+Una latenza elevata o una disconnessione possono causare blocchi dei processi applicativi e la mancata sincronizzazione delle transazioni in tempo reale.
 
 ---
 
-## Motivazione del controllo
-Il monitoraggio della rete è stato introdotto perché:
-- La continuità operativa dipende dalla connessione stabile  
-- I log e le vendite devono essere registrati correttamente  
-- Allertare immediatamente il personale tecnico riduce i rischi di interruzione  
-
-Il controllo della latenza e della raggiungibilità consente:
-- Prevenire blocchi del sistema  
-- Registrare in modo accurato gli eventi nel log  
-- Fornire alert chiari in caso di problemi
+## Motivazione della scelta
+Questa problematica è stata selezionata perché la continuità operativa (Business Continuity) è il requisito principale di un punto vendita.  
+Identificare preventivamente un guasto di rete permette al sistema di passare in modalità **offline** senza che l'utente finale percepisca interruzioni.
 
 ---
 
-## Funzionamento dello script
-Lo script verifica la **connessione della cassa al server centrale** e gestisce automaticamente la modalità offline se necessario.  
-
-In particolare:
-- Crea `cassa.log` se non esiste  
-- Invia un ping al server (`ping -c 1 -W 2 $SERVER_IP`) per verificarne la raggiungibilità  
-- Estrae la latenza e la confronta con la soglia configurabile (`SOGLIA_MS`)  
-- Se la latenza è troppo alta o il server non risponde:  
-  - La cassa passa in modalità offline  
-  - Viene generato un messaggio di warning a video  
-  - L’evento viene registrato nel log con dettagli  
-- Riassume gli errori storici nel log, distinguendo tra server irraggiungibile e connessione lenta
+## Può causare
+- **Blocchi alla cassa**: attese infinite per risposte dal server che non arrivano.  
+- **Incertezza operativa**: l'operatore non sa se il sistema è connesso o se sta lavorando "nel vuoto".  
+- **Perdita di vendite**: impossibilità di chiudere lo scontrino per timeout di rete.
 
 ---
 
-##  Esecuzione
-Esecuzione standard (usa IP e soglia di default)
+## Rilevanza nel contesto
+- Permette una gestione fluida del passaggio tra stato **Online** e **Offline**.  
+- Fornisce dati storici utili per diagnosticare guasti infrastrutturali ricorrenti.
+
+---
+
+## Sintesi tecnica del funzionamento
+Lo script utilizza il comando `ping` per testare la raggiungibilità dell'host.  
+Attraverso `grep` e `awk`, isola il valore numerico della latenza (ms) dalla stringa di risposta del terminale, permettendo un confronto logico con una soglia prefissata.  
+Ogni evento viene registrato in un log tramite l'operatore di ridirezione `>>`.
+
+---
+
+## Come usare lo script
+Abilitare i permessi di esecuzione e lanciare lo script:
+
+```bash
+chmod +x check_network.sh
 ./check_network.sh
+```
 
-Esecuzione con IP e soglia personalizzati
-Esempio: server locale con soglia 100ms
-./check_network.sh 192.168.1.50 100
+## 2) Problema individuato
 
-# 2) Gestione Buffer Vendite Offline (`svuota_buffer.sh`)
 
-Nel sistema di casse analizzato, **le vendite registrate offline devono essere salvaguardate**.  
-Un buffer locale non gestito correttamente può causare:
+**Problema:** Svuotamento sicuro del buffer vendite (`svuota_buffer.sh`).
 
-- Perdita di dati di vendita  
-- Incoerenze tra database locale e server  
-- Errori nella ricostruzione dei log  
-- Problemi durante la sincronizzazione offline → online  
-
-In ambienti con funzionamento **offline/online intermittente**, la gestione del buffer è fondamentale per:
-- Proteggere i dati fiscali  
-- Garantire la coerenza dei report  
-- Evitare svuotamenti prematuri del buffer
+Le vendite effettuate mentre la rete è assente vengono salvate in un file temporaneo (`vendite_buffer.csv`).  
+Il rischio critico è la cancellazione accidentale di queste informazioni prima che il server centrale ne abbia confermato la corretta ricezione.
 
 ---
 
-## Motivazione del controllo
-La gestione del buffer è stata introdotta perché:
-- Le vendite offline devono essere conservate fino alla conferma server  
-- Gli errori nella cancellazione prematura del buffer possono corrompere i dati  
-- La tracciabilità richiede log affidabili e completi  
-
-Il controllo consente:
-- Protezione dei dati fiscali  
-- Allineamento costante tra cassa e server  
-- Alert immediati in caso di problemi
+## Motivazione della scelta
+La scelta è dettata dalla necessità di garantire l'integrità dei dati fiscali.  
+In un contesto aziendale, perdere i dati di vendita significa un danno economico certo.  
+Lo script implementa una logica di "handshake" per proteggere il patrimonio informativo.
 
 ---
 
-## Funzionamento dello script
-Lo script gestisce il **buffer delle vendite offline** salvato in `vendite_buffer.csv`.  
+## Può causare
+- **Perdita di incassi**: dati eliminati localmente ma mai arrivati al database centrale.  
+- **Errori contabili**: discrepanze tra il denaro presente fisicamente in cassa e quello registrato digitalmente.
 
-In particolare:
-- Verifica l’esistenza del file buffer prima di procedere  
-- Conta il numero di transazioni presenti (oltre l’intestazione)  
-- Cancella il buffer solo se il server conferma la ricezione con "OK"  
-- Mantiene l’intestazione CSV per preservare il formato  
-- Registra ogni operazione in `cassa.log` con timestamp, stato e dettagli  
+---
 
---- 
+## Rilevanza nel contesto
+- Garantisce la sicurezza del dato fiscale in ogni condizione di connettività.  
+- Automatizza il riallineamento dei dati non appena la connessione torna stabile.
 
-## Esecuzione
-Rendi eseguibile lo script  
-chmod +x svuota_buffer.sh  
+---
 
-Esecuzione standard  
+## Sintesi tecnica del funzionamento
+Lo script:
+1. Calcola il volume dei dati tramite il comando `wc -l`.  
+2. Se sono presenti transazioni, simula la sincronizzazione con il server.  
+3. In caso di successo, utilizza il comando `sed` per svuotare il file mantenendo solo l’intestazione:
+
+```bash
+sed -i '1!d' vendite_buffer.csv
+```
+## Come usare lo script
+
+Abilitare i permessi di esecuzione e lanciare lo script:
+
+```bash
+chmod +x svuota_buffer.sh
 ./svuota_buffer.sh
+```
+
+
+## 3) Problema individuato
+
+
+**Problema:** Ricostruzione scontrini quando il server non è raggiungibile (`genera_scontrino.sh`).
+
+Quando si opera offline, il sistema registra solo gli ID numerici dei prodotti.  
+Tuttavia, per normativa e trasparenza verso il cliente, è necessario produrre un documento leggibile che riporti nomi descrittivi e prezzi calcolati correttamente.
 
 ---
 
-# 3) Generazione Scontrini Offline (`genera_scontrino.sh`)
-
-Nel sistema di casse analizzato, **le vendite offline devono essere presentate in modo leggibile**.  
-Un buffer tecnico con soli codici prodotto può causare:
-
-- Scontrini illeggibili per clienti e personale  
-- Difficoltà nel verificare rapidamente i prodotti venduti  
-- Errori di calcolo nei totali degli scontrini  
-
-In ambienti con funzionamento **offline/online intermittente**, la generazione corretta degli scontrini è fondamentale per:
-- Garantire trasparenza nei confronti del cliente  
-- Assicurare la coerenza dei dati fiscali  
-- Mantenere la tracciabilità delle vendite
+## Motivazione della scelta
+Questo problema è stato selezionato per dimostrare la capacità del sistema di operare in **Edge Computing**.  
+La cassa deve essere autonoma e in grado di processare dati complessi (join tra ID e descrizioni) anche senza l’ausilio di un database remoto.
 
 ---
 
-## Motivazione del controllo
-La generazione degli scontrini offline è stata introdotta perché:
-- I codici tecnici da soli non sono comprensibili  
-- I totali devono corrispondere ai dati grezzi del buffer  
-- La tracciabilità richiede registrazioni leggibili e complete  
-
-Il controllo consente:
-- Trasformare codici prodotto in nomi commerciali  
-- Ricalcolare correttamente i totali  
-- Registrare ogni evento nel log con tracciabilità chiara
+## Può causare
+- **Mancanza di trasparenza**: il cliente non è in grado di verificare la correttezza della spesa.  
+- **Difficoltà nei controlli**: il personale non può validare l’uscita della merce.
 
 ---
 
-## Funzionamento dello script
-Lo script trasforma le vendite offline in **scontrini leggibili**.  
-
-In particolare:
-- Estrae l’ultimo ID scontrino dal buffer (`tail` + `cut`)  
-- Converte codici prodotto in nomi commerciali tramite `prodotti_default.csv`  
-- Ricalcola il totale dello scontrino con `awk`  
-- Allinea nomi prodotti e prezzi a terminale usando `printf`  
-- Registra l’evento in `cassa.log` con tag `PRINT_RECEIPT`  
+## Rilevanza nel contesto
+- Assicura l’autonomia della cassa grazie all’integrazione con un catalogo locale (`prodotti_default.csv`).  
+- Migliora la qualità del servizio al cliente riducendo i tempi di attesa per la generazione dello scontrino.
 
 ---
 
-##  Esecuzione
-Rendi eseguibile lo script  
-chmod +x genera_scontrino.sh  
+## Sintesi tecnica del funzionamento
+Lo script:
+1. Effettua una ricerca all’interno dei file dati tramite `grep`.  
+2. Utilizza `awk` per sommare i valori decimali dei prezzi e calcolare il totale.  
+3. Usa `printf` per formattare l’output in colonne allineate, garantendo un layout simile a quello di una stampante fiscale fisica.
 
- Esecuzione standard  
-./genera_scontrino.sh  
+---
 
+## Come usare lo script
+Abilitare i permessi di esecuzione e lanciare lo script:
+
+```bash
+chmod +x genera_scontrino.sh
+./genera_scontrino.sh
+``` 
 **Output:** lo scontrino viene stampato a terminale e l’evento registrato in `cassa.log`.
 
 
