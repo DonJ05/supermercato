@@ -446,8 +446,13 @@ Lo script gestisce l'invio dei file `vendite_buffer.csv` al server centrale, pre
 - Aggiorna il log locale con esito dell’operazione, così da tracciare tutte le azioni.
 
 #### Come usare lo script
+Avviare il codice simula server
 ```bash
-./ex7.sh vendite_buffer_12345.csv
+./server/fserver.py
+```
+Avviare lo script
+```bash
+./cassa/ex7.sh vendite_buffer_12345.csv
 ```
 ---
 
