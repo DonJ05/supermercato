@@ -3,7 +3,7 @@
 **Problema:** Analisi e resilienza della connessione (`check_network.sh`).
 
 In un sistema operativo GNU/Linux dedicato alla vendita, la rete deve essere monitorata costantemente.  
-Una latenza elevata o una disconnessione possono causare blocchi dei processi applicativi e la mancata sincronizzazione delle transazioni in tempo reale.
+Una latenza elevata o una disconnessione possono causare blocchi dei processi applicativi e la mancata sincronizzazione delle transazioni in tempo 
 
 ---
 
@@ -176,10 +176,20 @@ Lo script `ScriptCassa.sh` gestisce l’aggiornamento automatico del file `prodo
 ---
 
 #### Come usare lo script
-
+Per avviare lo script serve:
 ```bash
 ./ScriptCassa.sh
 ```
+Per avviare il server che manda i dati alla cassa serve:
+```bash
+python3 server.py
+```
+oppure:
+```bash
+python server.py
+```
+Per usufruire di questi script bisogna essere nella cartella `progetto_casse4Alt`
+
 
 
 ## 5) Problema individuato
@@ -266,10 +276,11 @@ Lo script `ScriptPerms.sh` assicura che i file critici della cassa siano protett
 ---
 
 ### Come usare lo script
-
+Per avviare lo script serve:
 ```bash
 ./ScriptPerms.sh
 ```
+Per usufruire di questo script bisogna essere nella cartella `progetto_cassa5`
 
 ## 6) Problema individuato
 
@@ -385,7 +396,7 @@ Lo script opera in modo continuo o periodico senza interferire con le normali op
 ---
 
 ### Come usare lo script
-
+Per avviare lo script serve:
 ```bash
 sudo ./scriptControl.sh
 ```
@@ -393,6 +404,15 @@ oppure se si vuol fare andare lo script in background:
 ```bash
 sudo ./scriptControl.sh &
 ```
+Per avviare l'applicazione della cassa serve:
+```bash
+python3 cassa_app.py
+```
+oppure:
+```bash
+python cassa_app.py
+```
+Per usufruire di questo script bisogna essere nella cartella `progetto_casse6`
 
 
 ## 7) Problema individuato
