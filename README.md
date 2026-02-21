@@ -557,7 +557,7 @@ Lo script gestisce anche:
 
 ### Come usare lo Script
 ```bash
-./cassa/ex9.sh 2026-02-01 ./log/log_cassa.log
+./ex9.sh 2026-02-01 ./log/log_cassa.log
 ```
 - Lo script richiede due parametri:
   1. Il giorno da analizzare, nel formato `YYYY-MM-DD`
