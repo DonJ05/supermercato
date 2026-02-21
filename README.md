@@ -448,7 +448,7 @@ Lo script gestisce l'invio dei file `vendite_buffer.csv` al server centrale, pre
 #### Come usare lo script
 Avviare il codice simula server
 ```bash
-./server/fserver.py
+python ./server/fserver.py
 ```
 Avviare lo script
 ```bash
@@ -501,19 +501,27 @@ Intercettare all’avvio:
 
 La gestione preventiva è più sicura ed efficace rispetto a un intervento reattivo.
 
-## Cosa fa lo script (descrizione dettagliata)
+## Cosa fa lo script
 
 Lo script `ex8.sh` viene eseguito all’avvio della cassa (tramite cronjob `@reboot ../cassa/ex8.sh`) e serve a prevenire condizioni critiche durante l’avvio del sistema.
 
 ### Funzionalità principali
 - Controlla che la cassa parta in condizioni sicure verificando:
-  - L’interfaccia **loopback (lo)** sia attiva.
+  - L’interfaccia **loopback (lo)** sia attiva, Genera messaggi di errore e alert verso il sistemista in caso di anomalie.
   - La dimensione del log non superi la soglia di sicurezza (50 MB).
 - Se il log è troppo grande:
   - Lo comprime in un archivio ZIP con timestamp.
   - Svuota il file originale senza modificare i permessi.
-- Genera messaggi di errore e alert verso il sistemista in caso di anomalie.
 
+
+#### Come usare lo script
+
+Lo script `ex8.sh` viene eseguito all’avvio della cassa (tramite cronjob `@reboot ../cassa/ex8.sh`) e serve a prevenire condizioni critiche durante l’avvio del sistema.
+
+Se vuoi testare lo script
+```bash
+./cassa/ex8.sh
+```
 ---
 
 ## 9) Problema individuato
@@ -545,12 +553,11 @@ Lo script gestisce anche:
 - Validazione del formato della data
 - Verifica dell’esistenza del file di log
 - Creazione di un file di output strutturato con intestazione
-- Evita di generare dati duplicati per lo stesso giorno
-- Scrive i risultati in un file CSV-like (`status_offline.log`) pronto per estrazioni o report
+- Scrive i risultati in un file (`status_offline.log`) pronto per estrazioni o report
 
 ### Come usare lo Script
 ```bash
-./ex9.sh YYYY-MM-DD LOG_CASSA
+./cassa/ex9.sh 2026-02-01 ./log/log_cassa.log
 ```
 - Lo script richiede due parametri:
   1. Il giorno da analizzare, nel formato `YYYY-MM-DD`
@@ -606,8 +613,13 @@ In particolare:
 - Fornisce un riscontro chiaro sugli orari finali di cassa e server
 
 ### Come usare lo script
+Avviare il codice simula server
 ```bash
-./ex10.sh 5
+python ./server/fserver.py
+```
+Avviare lo script
+```bash
+./cassa/ex10.sh 5
 ```
 - Lo script richiede **un solo parametro**: il numero di secondi di tolleranza ammessi tra cassa e server.
 - Se la differenza rientra nella soglia, il sistema viene considerato sincronizzato.
