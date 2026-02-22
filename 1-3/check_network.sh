@@ -7,7 +7,10 @@ SOGLIA_MS=200            # IL MASSIMO: se supera 200ms, la rete è troppo lenta
 CASSA_ID="CASSA_01"
 
 # Assicuriamoci che il file log esista per evitare errori di analisi
-touch "$LOG_FILE"
+if [ ! -f "$LOG_FILE" ]; then
+    echo "ERRORE: Il file $LOG_FILE non esiste!"
+    exit 1
+fi
 
 echo "--- DIAGNOSTICA RETE CASSA ---"
 
